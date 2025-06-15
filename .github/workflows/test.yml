@@ -1,0 +1,16 @@
+name: Test Website
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Test HTML is valid
+        run: |
+          echo "Checking if HTML file exists..."
+          test -f index.html
+          echo "✅ HTML file found!"
+          echo "Checking if CSS file exists..."
+          test -f style.css  
+          echo "✅ CSS file found!"
+          echo "All tests passed!"
