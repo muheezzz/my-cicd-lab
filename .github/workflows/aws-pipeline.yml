@@ -316,7 +316,7 @@ jobs:
           echo "🏥 Running staging health checks..."
           
           # Wait for S3 to propagate
-          sleep 10
+          sleep 20
           
           STAGING_URL="${{ steps.deploy.outputs.staging_url }}"
           echo "🔍 Checking staging URL: $STAGING_URL"
