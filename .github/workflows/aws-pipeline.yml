@@ -1,4 +1,4 @@
-name: Professional CI/CD Pipeline - AWS 
+name: Professional CI/CD Pipeline - AWS
 
 on:
   push:
@@ -145,7 +145,7 @@ jobs:
                           <h3>📦 Staging Environment</h3>
                           <p><strong>Status:</strong> <span class="badge">✅ ACTIVE</span></p>
                           <p><strong>Platform:</strong> AWS S3 + CloudFront</p>
-                          <p><strong>Region:</strong> us-east-2</p>
+                          <p><strong>Region:</strong> us-east-1</p>
                       </div>
                       
                       <div class="status-card production">
@@ -217,7 +217,7 @@ jobs:
             "environment": "staging",
             "version": "1.0.0",
             "platform": "AWS S3 + CloudFront",
-            "region": "us-east-2"
+            "region": "us-east-1"
           }
           EOF
           
@@ -272,7 +272,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
+          aws-region: us-east-1
           
       - name: 🚀 Deploy to S3 Staging
         id: deploy
@@ -296,7 +296,7 @@ jobs:
             --include "api.json"
           
           # Get the staging URL
-         STAGING_URL="http://${{ secrets.AWS_STAGING_BUCKET }}.s3-website.us-east-2.amazonaws.com"
+          STAGING_URL=""http://${{ secrets.AWS_STAGING_BUCKET }}.s3-website.us-east-2.amazonaws.com"
           echo "staging_url=$STAGING_URL" >> $GITHUB_OUTPUT
           
           echo "✅ S3 staging deployment complete!"
@@ -316,7 +316,7 @@ jobs:
           echo "🏥 Running staging health checks..."
           
           # Wait for S3 to propagate
-          sleep 20
+          sleep 10
           
           STAGING_URL="${{ steps.deploy.outputs.staging_url }}"
           echo "🔍 Checking staging URL: $STAGING_URL"
@@ -381,7 +381,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
+          aws-region: us-east-1
           
       - name: 💾 Backup Current Production
         run: |
@@ -428,7 +428,7 @@ jobs:
             --include "api.json"
           
           # Get the production URL
-          PRODUCTION_URL="http://${{ secrets.AWS_PROD_BUCKET }}.s3-website-us-east-2.amazonaws.com"
+          PRODUCTION_URL="https://${{ secrets.AWS_PROD_BUCKET }}.s3-website-us-east-1.amazonaws.com"
           echo "production_url=$PRODUCTION_URL" >> $GITHUB_OUTPUT
           
           echo "✅ S3 production deployment complete!"
@@ -535,7 +535,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
+          aws-region: us-east-1
           
       - name: 🧹 Cleanup Old Backups
         run: |
