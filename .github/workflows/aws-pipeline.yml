@@ -145,7 +145,7 @@ jobs:
                           <h3>📦 Staging Environment</h3>
                           <p><strong>Status:</strong> <span class="badge">✅ ACTIVE</span></p>
                           <p><strong>Platform:</strong> AWS S3 + CloudFront</p>
-                          <p><strong>Region:</strong> us-east-1</p>
+                          <p><strong>Region:</strong> us-east-2</p>
                       </div>
                       
                       <div class="status-card production">
@@ -217,7 +217,7 @@ jobs:
             "environment": "staging",
             "version": "1.0.0",
             "platform": "AWS S3 + CloudFront",
-            "region": "us-east-1"
+            "region": "us-east-2"
           }
           EOF
           
@@ -272,7 +272,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: us-east-2
           
       - name: 🚀 Deploy to S3 Staging
         id: deploy
@@ -381,7 +381,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: us-east-2
           
       - name: 💾 Backup Current Production
         run: |
@@ -535,7 +535,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: us-east-2
           
       - name: 🧹 Cleanup Old Backups
         run: |
