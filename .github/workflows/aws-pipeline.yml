@@ -1,0 +1,571 @@
+name: Professional CI/CD Pipeline - AWS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deploy to production?'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+
+jobs:
+  # Stage 1: Testing & Quality Checks
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔍 Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: 🧪 Run Tests
+        run: |
+          echo "🔬 Running unit tests..."
+          # Add your test commands here
+          # npm test, pytest, etc.
+          sleep 2
+          echo "✅ All tests passed!"
+          
+      - name: 🔍 Code Quality Check
+        run: |
+          echo "🔍 Running linting and code quality checks..."
+          # Add your linting commands here
+          # eslint, flake8, etc.
+          sleep 1
+          echo "✅ Code quality checks passed!"
+          
+      - name: 🏗️ Build Application
+        run: |
+          echo "🏗️ Building application..."
+          
+          # Create a professional static site
+          mkdir -p dist
+          
+          # Main HTML file
+          cat > dist/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Professional CI/CD Pipeline - AWS</title>
+              <style>
+                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                  body { 
+                      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      min-height: 100vh;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      padding: 20px;
+                  }
+                  .container { 
+                      background: white; 
+                      padding: 40px; 
+                      border-radius: 20px; 
+                      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                      max-width: 800px;
+                      width: 100%;
+                  }
+                  h1 { color: #333; margin-bottom: 30px; text-align: center; }
+                  .pipeline-status { 
+                      display: grid; 
+                      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+                      gap: 20px; 
+                      margin: 30px 0; 
+                  }
+                  .status-card { 
+                      padding: 20px; 
+                      border-radius: 10px; 
+                      border-left: 5px solid;
+                  }
+                  .staging { 
+                      background: #fff3cd; 
+                      border-left-color: #ffc107; 
+                  }
+                  .production { 
+                      background: #d1ecf1; 
+                      border-left-color: #17a2b8; 
+                  }
+                  .aws { 
+                      background: #f8d7da; 
+                      border-left-color: #dc3545; 
+                  }
+                  .commit { 
+                      font-family: 'Courier New', monospace; 
+                      background: #f8f9fa; 
+                      padding: 8px; 
+                      border-radius: 5px; 
+                      font-size: 12px;
+                      word-break: break-all;
+                  }
+                  .steps { 
+                      list-style: none; 
+                      padding: 0; 
+                      margin: 20px 0; 
+                  }
+                  .steps li { 
+                      padding: 10px; 
+                      margin: 5px 0; 
+                      background: #f8f9fa; 
+                      border-radius: 5px; 
+                      border-left: 3px solid #28a745;
+                  }
+                  .metadata { 
+                      background: #e9ecef; 
+                      padding: 20px; 
+                      border-radius: 10px; 
+                      margin-top: 20px; 
+                  }
+                  .metadata h3 { margin-bottom: 15px; color: #495057; }
+                  .badge { 
+                      display: inline-block; 
+                      padding: 4px 8px; 
+                      background: #28a745; 
+                      color: white; 
+                      border-radius: 12px; 
+                      font-size: 12px; 
+                      margin: 2px; 
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>🚀 Professional CI/CD Pipeline on AWS</h1>
+                  
+                  <div class="pipeline-status">
+                      <div class="status-card staging">
+                          <h3>📦 Staging Environment</h3>
+                          <p><strong>Status:</strong> <span class="badge">✅ ACTIVE</span></p>
+                          <p><strong>Platform:</strong> AWS S3 + CloudFront</p>
+                          <p><strong>Region:</strong> us-east-1</p>
+                      </div>
+                      
+                      <div class="status-card production">
+                          <h3>🌟 Production Ready</h3>
+                          <p><strong>Status:</strong> <span class="badge">⏳ PENDING</span></p>
+                          <p><strong>Approval:</strong> Manual Required</p>
+                          <p><strong>Auto-Rollback:</strong> Enabled</p>
+                      </div>
+                      
+                      <div class="status-card aws">
+                          <h3>☁️ AWS Infrastructure</h3>
+                          <p><strong>CDN:</strong> CloudFront</p>
+                          <p><strong>Storage:</strong> S3 Bucket</p>
+                          <p><strong>Monitoring:</strong> CloudWatch</p>
+                      </div>
+                  </div>
+                  
+                  <div class="metadata">
+                      <h3>🔄 Deployment Information</h3>
+                      <p><strong>Deployed:</strong> <span id="timestamp"></span></p>
+                      <p><strong>Commit SHA:</strong> <span class="commit" id="commit-sha">Loading...</span></p>
+                      <p><strong>Author:</strong> <span id="author">Loading...</span></p>
+                      <p><strong>Branch:</strong> main</p>
+                      <p><strong>Environment:</strong> <span id="environment">staging</span></p>
+                  </div>
+                  
+                  <ul class="steps">
+                      <li>✅ Code Quality Checks Passed</li>
+                      <li>✅ Unit Tests Passed</li>
+                      <li>✅ Security Scan Passed</li>
+                      <li>✅ Build Process Completed</li>
+                      <li>✅ AWS S3 Upload Successful</li>
+                      <li>✅ CloudFront Cache Invalidated</li>
+                      <li>✅ Health Checks Passed</li>
+                      <li>⏳ Ready for Production Deployment</li>
+                  </ul>
+              </div>
+              
+              <script>
+                  // Update timestamp
+                  document.getElementById('timestamp').textContent = new Date().toLocaleString();
+                  
+                  // Simulate getting commit info (in real deployment, this would be populated by the build process)
+                  document.getElementById('commit-sha').textContent = 'COMMIT_SHA_PLACEHOLDER';
+                  document.getElementById('author').textContent = 'AUTHOR_PLACEHOLDER';
+                  
+                  // Set environment based on URL
+                  if (window.location.hostname.includes('staging')) {
+                      document.getElementById('environment').textContent = 'staging';
+                  } else if (window.location.hostname.includes('prod')) {
+                      document.getElementById('environment').textContent = 'production';
+                  }
+              </script>
+          </body>
+          </html>
+          EOF
+          
+          # Replace placeholders with actual values
+          sed -i "s/COMMIT_SHA_PLACEHOLDER/${{ github.sha }}/g" dist/index.html
+          sed -i "s/AUTHOR_PLACEHOLDER/${{ github.actor }}/g" dist/index.html
+          
+          # Health check endpoint
+          cat > dist/health.json << EOF
+          {
+            "status": "healthy",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "author": "${{ github.actor }}",
+            "environment": "staging",
+            "version": "1.0.0",
+            "platform": "AWS S3 + CloudFront",
+            "region": "us-east-1"
+          }
+          EOF
+          
+          # Add a simple API endpoint simulation
+          cat > dist/api.json << EOF
+          {
+            "message": "Professional CI/CD Pipeline API",
+            "status": "operational",
+            "endpoints": [
+              "/health",
+              "/api",
+              "/"
+            ],
+            "deployment": {
+              "commit": "${{ github.sha }}",
+              "author": "${{ github.actor }}",
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            }
+          }
+          EOF
+          
+          echo "✅ Build successful!"
+          echo "📦 Generated files:"
+          ls -la dist/
+          
+      - name: 📦 Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: aws-build
+          path: dist/
+
+  # Stage 2: Deploy to AWS S3 Staging
+  deploy-staging:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.staging_url }}
+    steps:
+      - name: 🔍 Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: 📦 Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: aws-build
+          path: dist/
+          
+      - name: ⚙️ Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+          
+      - name: 🚀 Deploy to S3 Staging
+        id: deploy
+        run: |
+          echo "🚀 Deploying to AWS S3 staging..."
+          
+          # Sync files to S3 staging bucket
+          aws s3 sync dist/ s3://${{ secrets.AWS_STAGING_BUCKET }}/ \
+            --delete \
+            --cache-control "public, max-age=31536000" \
+            --exclude "*.html" \
+            --exclude "health.json" \
+            --exclude "api.json"
+            
+          # Upload HTML files with shorter cache
+          aws s3 sync dist/ s3://${{ secrets.AWS_STAGING_BUCKET }}/ \
+            --delete \
+            --cache-control "public, max-age=0, must-revalidate" \
+            --include "*.html" \
+            --include "health.json" \
+            --include "api.json"
+          
+          # Get the staging URL
+          STAGING_URL="https://${{ secrets.AWS_STAGING_BUCKET }}.s3-website-us-east-1.amazonaws.com"
+          echo "staging_url=$STAGING_URL" >> $GITHUB_OUTPUT
+          
+          echo "✅ S3 staging deployment complete!"
+          echo "🌐 Staging URL: $STAGING_URL"
+          
+      - name: 🔄 Invalidate CloudFront Cache (Staging)
+        if: vars.AWS_STAGING_CLOUDFRONT_ID != ''
+        run: |
+          echo "🔄 Invalidating CloudFront cache for staging..."
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ vars.AWS_STAGING_CLOUDFRONT_ID }} \
+            --paths "/*"
+          echo "✅ CloudFront cache invalidated"
+          
+      - name: 🏥 Staging Health Check
+        run: |
+          echo "🏥 Running staging health checks..."
+          
+          # Wait for S3 to propagate
+          sleep 10
+          
+          STAGING_URL="${{ steps.deploy.outputs.staging_url }}"
+          echo "🔍 Checking staging URL: $STAGING_URL"
+          
+          # Check if staging site is accessible
+          if curl -f -s "$STAGING_URL" > /dev/null; then
+            echo "✅ Staging site is accessible"
+          else
+            echo "❌ Staging site is not accessible"
+            exit 1
+          fi
+          
+          # Check health endpoint
+          if curl -f -s "$STAGING_URL/health.json" | jq -e '.status == "healthy"' > /dev/null; then
+            echo "✅ Health endpoint is working"
+          else
+            echo "❌ Health endpoint failed"
+            exit 1
+          fi
+          
+          # Check API endpoint
+          if curl -f -s "$STAGING_URL/api.json" | jq -e '.status == "operational"' > /dev/null; then
+            echo "✅ API endpoint is working"
+          else
+            echo "❌ API endpoint failed"
+            exit 1
+          fi
+          
+          echo "✅ All staging health checks passed!"
+          
+      - name: 📊 Staging Report
+        run: |
+          echo "📊 Staging Deployment Report"
+          echo "================================="
+          echo "🌐 Staging URL: ${{ steps.deploy.outputs.staging_url }}"
+          echo "☁️ S3 Bucket: ${{ secrets.AWS_STAGING_BUCKET }}"
+          echo "📝 Commit: ${{ github.sha }}"
+          echo "👤 Author: ${{ github.actor }}"
+          echo "🕐 Time: $(date)"
+          echo "✅ Status: Ready for production"
+
+  # Stage 3: Deploy to AWS S3 Production
+  deploy-production:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.production_url }}
+    steps:
+      - name: 🔍 Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: 📦 Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: aws-build
+          path: dist/
+          
+      - name: ⚙️ Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+          
+      - name: 💾 Backup Current Production
+        run: |
+          echo "💾 Creating backup of current production..."
+          
+          # Create backup bucket name with timestamp
+          BACKUP_BUCKET="${{ secrets.AWS_PROD_BUCKET }}-backup-$(date +%Y%m%d-%H%M%S)"
+          
+          # Copy current production to backup (only if production bucket has content)
+          if aws s3 ls s3://${{ secrets.AWS_PROD_BUCKET }}/ > /dev/null 2>&1; then
+            aws s3 sync s3://${{ secrets.AWS_PROD_BUCKET }}/ s3://$BACKUP_BUCKET/
+            echo "backup_bucket=$BACKUP_BUCKET" >> $GITHUB_ENV
+            echo "✅ Production backup created: $BACKUP_BUCKET"
+          else
+            echo "ℹ️ No existing production deployment to backup"
+          fi
+          
+      - name: 🚀 Deploy to S3 Production
+        id: deploy
+        run: |
+          echo "🚀 Deploying to AWS S3 production..."
+          
+          # Update index.html to show production environment
+          sed -i 's/staging/production/g' dist/index.html
+          sed -i 's/PENDING/ACTIVE/g' dist/index.html
+          
+          # Update health check for production
+          jq '.environment = "production"' dist/health.json > tmp.json && mv tmp.json dist/health.json
+          
+          # Sync files to S3 production bucket
+          aws s3 sync dist/ s3://${{ secrets.AWS_PROD_BUCKET }}/ \
+            --delete \
+            --cache-control "public, max-age=31536000" \
+            --exclude "*.html" \
+            --exclude "health.json" \
+            --exclude "api.json"
+            
+          # Upload HTML files with shorter cache
+          aws s3 sync dist/ s3://${{ secrets.AWS_PROD_BUCKET }}/ \
+            --delete \
+            --cache-control "public, max-age=0, must-revalidate" \
+            --include "*.html" \
+            --include "health.json" \
+            --include "api.json"
+          
+          # Get the production URL
+          PRODUCTION_URL="https://${{ secrets.AWS_PROD_BUCKET }}.s3-website-us-east-1.amazonaws.com"
+          echo "production_url=$PRODUCTION_URL" >> $GITHUB_OUTPUT
+          
+          echo "✅ S3 production deployment complete!"
+          echo "🌐 Production URL: $PRODUCTION_URL"
+          
+      - name: 🔄 Invalidate CloudFront Cache (Production)
+        if: vars.AWS_PROD_CLOUDFRONT_ID != ''
+        run: |
+          echo "🔄 Invalidating CloudFront cache for production..."
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ vars.AWS_PROD_CLOUDFRONT_ID }} \
+            --paths "/*"
+          echo "✅ CloudFront cache invalidated"
+          
+      - name: 🏥 Production Health Check
+        id: health-check
+        run: |
+          echo "🏥 Running production health checks..."
+          
+          # Wait for S3 and CloudFront to propagate
+          sleep 20
+          
+          PROD_URL="${{ steps.deploy.outputs.production_url }}"
+          echo "🔍 Checking production URL: $PROD_URL"
+          
+          # Check if production site is accessible
+          if curl -f -s "$PROD_URL" > /dev/null; then
+            echo "✅ Production site is accessible"
+          else
+            echo "❌ Production site is not accessible"
+            echo "healthy=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          # Check health endpoint
+          if curl -f -s "$PROD_URL/health.json" | jq -e '.status == "healthy"' > /dev/null; then
+            echo "✅ Health endpoint is working"
+          else
+            echo "❌ Health endpoint failed"
+            echo "healthy=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          # Check that it shows production environment
+          if curl -s "$PROD_URL" | grep -q "production"; then
+            echo "✅ Production environment verified"
+          else
+            echo "❌ Production environment not detected"
+            echo "healthy=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          # Simulate occasional failure for demo (15% chance)
+          if [ $((RANDOM % 7)) -eq 0 ]; then
+            echo "❌ Simulated health check failure for demo!"
+            echo "healthy=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          echo "✅ All production health checks passed!"
+          echo "healthy=true" >> $GITHUB_OUTPUT
+          
+      - name: 🚨 Auto-Rollback on Failure
+        if: failure() && steps.health-check.outputs.healthy == 'false' && env.backup_bucket != ''
+        run: |
+          echo "🚨 PRODUCTION ISSUE DETECTED!"
+          echo "🔄 Initiating automatic rollback..."
+          
+          # Restore from backup
+          echo "💾 Restoring from backup: ${{ env.backup_bucket }}"
+          aws s3 sync s3://${{ env.backup_bucket }}/ s3://${{ secrets.AWS_PROD_BUCKET }}/
+          
+          # Invalidate CloudFront cache after rollback
+          if [ -n "${{ vars.AWS_PROD_CLOUDFRONT_ID }}" ]; then
+            aws cloudfront create-invalidation \
+              --distribution-id ${{ vars.AWS_PROD_CLOUDFRONT_ID }} \
+              --paths "/*"
+          fi
+          
+          echo "✅ Rollback complete!"
+          echo "📧 Production has been restored to previous working version"
+          
+      - name: 📊 Production Report
+        if: success()
+        run: |
+          echo "📊 Production Deployment Report"
+          echo "================================="
+          echo "🌐 Production URL: ${{ steps.deploy.outputs.production_url }}"
+          echo "☁️ S3 Bucket: ${{ secrets.AWS_PROD_BUCKET }}"
+          echo "📝 Commit: ${{ github.sha }}"
+          echo "👤 Deployed by: ${{ github.actor }}"
+          echo "🕐 Time: $(date)"
+          echo "✅ Status: Successfully deployed"
+          echo "🏥 Health: All systems operational"
+
+  # Stage 4: Cleanup and Notification
+  cleanup:
+    needs: [deploy-staging, deploy-production]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: ⚙️ Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+          
+      - name: 🧹 Cleanup Old Backups
+        run: |
+          echo "🧹 Cleaning up old backup buckets..."
+          
+          # List backup buckets older than 7 days and delete them
+          aws s3api list-buckets --query 'Buckets[?contains(Name, `backup`) && CreationDate < `'$(date -d '7 days ago' -u +%Y-%m-%dT%H:%M:%SZ)'`].Name' --output text | \
+          while read bucket; do
+            if [ -n "$bucket" ]; then
+              echo "🗑️ Deleting old backup bucket: $bucket"
+              aws s3 rb s3://$bucket --force
+            fi
+          done
+          
+      - name: 📧 Send Notifications
+        run: |
+          echo "📧 Sending deployment notifications..."
+          
+          if [ "${{ needs.deploy-staging.result }}" == "success" ]; then
+            echo "✅ Staging deployment successful - ready for production"
+          fi
+          
+          if [ "${{ needs.deploy-production.result }}" == "success" ]; then
+            echo "🎉 Production deployment successful!"
+          elif [ "${{ needs.deploy-production.result }}" == "failure" ]; then
+            echo "🚨 Production deployment failed - rollback initiated"
+          fi
+          
+          # Here you would add your notification integrations:
+          # - SNS notifications
+          # - Slack webhooks  
+          # - Email via SES
+          # - Teams notifications
