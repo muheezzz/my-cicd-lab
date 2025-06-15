@@ -1,16 +1,25 @@
-name: Test Website
+name: Website Tests
 on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Test HTML is valid
+      - name: Install HTML validator
         run: |
-          echo "Checking if HTML file exists..."
-          test -f index.html
-          echo "✅ HTML file found!"
-          echo "Checking if CSS file exists..."
-          test -f style.css  
-          echo "✅ CSS file found!"
-          echo "All tests passed!"
+          sudo apt-get update
+          sudo apt-get install -y tidy
+      - name: Validate HTML
+        run: |
+          echo "🔍 Checking HTML syntax..."
+          tidy -q -e index.html
+          echo "✅ HTML is valid!"
+      - name: Check required content
+        run: |
+          echo "🔍 Checking if title exists..."
+          grep -q "<title>" index.html || (echo "❌ Missing title tag!" && exit 1)
+          echo "✅ Title tag found!"
+          
+          echo "🔍 Checking if h1 exists..."
+          grep -q "<h1>" index.html || (echo "❌ Missing h1 tag!" && exit 1)
+          echo "✅ H1 tag found!"
