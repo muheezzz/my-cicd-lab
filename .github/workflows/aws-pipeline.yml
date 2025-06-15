@@ -296,7 +296,7 @@ jobs:
             --include "api.json"
           
           # Get the staging URL
-          STAGING_URL="https://${{ secrets.AWS_STAGING_BUCKET }}.s3-website-us-east-1.amazonaws.com"
+          STAGING_URL="https://${{ secrets.AWS_STAGING_BUCKET }}.s3-website-us-east-2.amazonaws.com"
           echo "staging_url=$STAGING_URL" >> $GITHUB_OUTPUT
           
           echo "✅ S3 staging deployment complete!"
@@ -428,7 +428,7 @@ jobs:
             --include "api.json"
           
           # Get the production URL
-          PRODUCTION_URL="https://${{ secrets.AWS_PROD_BUCKET }}.s3-website-us-east-1.amazonaws.com"
+          PRODUCTION_URL="https://${{ secrets.AWS_PROD_BUCKET }}.s3-website-us-east-2.amazonaws.com"
           echo "production_url=$PRODUCTION_URL" >> $GITHUB_OUTPUT
           
           echo "✅ S3 production deployment complete!"
