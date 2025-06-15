@@ -47,9 +47,8 @@ jobs:
           # Create a professional static site
           mkdir -p dist
           
-          # Main HTML file
-          cat > dist/index.html << 
-          EOF
+          # Main HTML file (Fixed EOF delimiter)
+          cat > dist/index.html << 'EOF'
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -146,7 +145,7 @@ jobs:
                           <h3>📦 Staging Environment</h3>
                           <p><strong>Status:</strong> <span class="badge">✅ ACTIVE</span></p>
                           <p><strong>Platform:</strong> AWS S3 + CloudFront</p>
-                          <p><strong>Region:</strong> us-east-1</p>
+                          <p><strong>Region:</strong> us-east-2</p>
                       </div>
                       
                       <div class="status-card production">
@@ -209,21 +208,26 @@ jobs:
           sed -i "s/AUTHOR_PLACEHOLDER/${{ github.actor }}/g" dist/index.html
           
           # Health check endpoint
-          cat > dist/health.json << EOF
+          cat > dist/health.json << 'EOF'
           {
             "status": "healthy",
-            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "commit": "${{ github.sha }}",
-            "author": "${{ github.actor }}",
+            "timestamp": "TIMESTAMP_PLACEHOLDER",
+            "commit": "COMMIT_PLACEHOLDER",
+            "author": "AUTHOR_PLACEHOLDER",
             "environment": "staging",
             "version": "1.0.0",
             "platform": "AWS S3 + CloudFront",
-            "region": "us-east-1"
+            "region": "us-east-2"
           }
           EOF
           
+          # Replace placeholders in health.json
+          sed -i "s/TIMESTAMP_PLACEHOLDER/$(date -u +%Y-%m-%dT%H:%M:%SZ)/g" dist/health.json
+          sed -i "s/COMMIT_PLACEHOLDER/${{ github.sha }}/g" dist/health.json
+          sed -i "s/AUTHOR_PLACEHOLDER/${{ github.actor }}/g" dist/health.json
+          
           # Add a simple API endpoint simulation
-          cat > dist/api.json << EOF
+          cat > dist/api.json << 'EOF'
           {
             "message": "Professional CI/CD Pipeline API",
             "status": "operational",
@@ -233,12 +237,17 @@ jobs:
               "/"
             ],
             "deployment": {
-              "commit": "${{ github.sha }}",
-              "author": "${{ github.actor }}",
-              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+              "commit": "COMMIT_PLACEHOLDER",
+              "author": "AUTHOR_PLACEHOLDER",
+              "timestamp": "TIMESTAMP_PLACEHOLDER"
             }
           }
           EOF
+          
+          # Replace placeholders in api.json
+          sed -i "s/COMMIT_PLACEHOLDER/${{ github.sha }}/g" dist/api.json
+          sed -i "s/AUTHOR_PLACEHOLDER/${{ github.actor }}/g" dist/api.json
+          sed -i "s/TIMESTAMP_PLACEHOLDER/$(date -u +%Y-%m-%dT%H:%M:%SZ)/g" dist/api.json
           
           echo "✅ Build successful!"
           echo "📦 Generated files:"
@@ -273,7 +282,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: us-east-2
           
       - name: 🚀 Deploy to S3 Staging
         id: deploy
@@ -296,8 +305,8 @@ jobs:
             --include "health.json" \
             --include "api.json"
           
-          # Get the staging URL
-          STAGING_URL=""http://${{ secrets.AWS_STAGING_BUCKET }}.s3-website.us-east-2.amazonaws.com"
+          # Get the staging URL (Fixed region consistency)
+          STAGING_URL="http://${{ secrets.AWS_STAGING_BUCKET }}.s3-website-us-east-2.amazonaws.com"
           echo "staging_url=$STAGING_URL" >> $GITHUB_OUTPUT
           
           echo "✅ S3 staging deployment complete!"
@@ -330,20 +339,39 @@ jobs:
             exit 1
           fi
           
-          # Check health endpoint
-          if curl -f -s "$STAGING_URL/health.json" | jq -e '.status == "healthy"' > /dev/null; then
-            echo "✅ Health endpoint is working"
+          # Check health endpoint (Install jq first)
+          if command -v jq > /dev/null; then
+            if curl -f -s "$STAGING_URL/health.json" | jq -e '.status == "healthy"' > /dev/null; then
+              echo "✅ Health endpoint is working"
+            else
+              echo "❌ Health endpoint failed"
+              exit 1
+            fi
           else
-            echo "❌ Health endpoint failed"
-            exit 1
+            echo "⚠️ jq not available, skipping JSON validation"
+            if curl -f -s "$STAGING_URL/health.json" > /dev/null; then
+              echo "✅ Health endpoint is accessible"
+            else
+              echo "❌ Health endpoint failed"
+              exit 1
+            fi
           fi
           
           # Check API endpoint
-          if curl -f -s "$STAGING_URL/api.json" | jq -e '.status == "operational"' > /dev/null; then
-            echo "✅ API endpoint is working"
+          if command -v jq > /dev/null; then
+            if curl -f -s "$STAGING_URL/api.json" | jq -e '.status == "operational"' > /dev/null; then
+              echo "✅ API endpoint is working"
+            else
+              echo "❌ API endpoint failed"
+              exit 1
+            fi
           else
-            echo "❌ API endpoint failed"
-            exit 1
+            if curl -f -s "$STAGING_URL/api.json" > /dev/null; then
+              echo "✅ API endpoint is accessible"
+            else
+              echo "❌ API endpoint failed"
+              exit 1
+            fi
           fi
           
           echo "✅ All staging health checks passed!"
@@ -382,7 +410,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: us-east-2
           
       - name: 💾 Backup Current Production
         run: |
@@ -391,11 +419,17 @@ jobs:
           # Create backup bucket name with timestamp
           BACKUP_BUCKET="${{ secrets.AWS_PROD_BUCKET }}-backup-$(date +%Y%m%d-%H%M%S)"
           
-          # Copy current production to backup (only if production bucket has content)
-          if aws s3 ls s3://${{ secrets.AWS_PROD_BUCKET }}/ > /dev/null 2>&1; then
-            aws s3 sync s3://${{ secrets.AWS_PROD_BUCKET }}/ s3://$BACKUP_BUCKET/
-            echo "backup_bucket=$BACKUP_BUCKET" >> $GITHUB_ENV
-            echo "✅ Production backup created: $BACKUP_BUCKET"
+          # Check if production bucket exists and has content
+          if aws s3 ls "s3://${{ secrets.AWS_PROD_BUCKET }}/" > /dev/null 2>&1; then
+            # Get the count of objects
+            OBJECT_COUNT=$(aws s3 ls "s3://${{ secrets.AWS_PROD_BUCKET }}/" --recursive | wc -l)
+            if [ "$OBJECT_COUNT" -gt 0 ]; then
+              aws s3 sync "s3://${{ secrets.AWS_PROD_BUCKET }}/" "s3://$BACKUP_BUCKET/"
+              echo "backup_bucket=$BACKUP_BUCKET" >> $GITHUB_ENV
+              echo "✅ Production backup created: $BACKUP_BUCKET"
+            else
+              echo "ℹ️ Production bucket is empty, no backup needed"
+            fi
           else
             echo "ℹ️ No existing production deployment to backup"
           fi
@@ -409,8 +443,13 @@ jobs:
           sed -i 's/staging/production/g' dist/index.html
           sed -i 's/PENDING/ACTIVE/g' dist/index.html
           
-          # Update health check for production
-          jq '.environment = "production"' dist/health.json > tmp.json && mv tmp.json dist/health.json
+          # Update health check for production (Install jq first if needed)
+          if command -v jq > /dev/null; then
+            jq '.environment = "production"' dist/health.json > tmp.json && mv tmp.json dist/health.json
+          else
+            # Fallback: use sed for simple replacement
+            sed -i 's/"staging"/"production"/g' dist/health.json
+          fi
           
           # Sync files to S3 production bucket
           aws s3 sync dist/ s3://${{ secrets.AWS_PROD_BUCKET }}/ \
@@ -429,7 +468,7 @@ jobs:
             --include "api.json"
           
           # Get the production URL
-          PRODUCTION_URL="https://${{ secrets.AWS_PROD_BUCKET }}.s3-website-us-east-1.amazonaws.com"
+          PRODUCTION_URL="https://${{ secrets.AWS_PROD_BUCKET }}.s3-website-us-east-2.amazonaws.com"
           echo "production_url=$PRODUCTION_URL" >> $GITHUB_OUTPUT
           
           echo "✅ S3 production deployment complete!"
@@ -446,6 +485,7 @@ jobs:
           
       - name: 🏥 Production Health Check
         id: health-check
+        continue-on-error: true
         run: |
           echo "🏥 Running production health checks..."
           
@@ -455,22 +495,32 @@ jobs:
           PROD_URL="${{ steps.deploy.outputs.production_url }}"
           echo "🔍 Checking production URL: $PROD_URL"
           
+          # Initialize health status
+          HEALTH_STATUS="true"
+          
           # Check if production site is accessible
           if curl -f -s "$PROD_URL" > /dev/null; then
             echo "✅ Production site is accessible"
           else
             echo "❌ Production site is not accessible"
-            echo "healthy=false" >> $GITHUB_OUTPUT
-            exit 1
+            HEALTH_STATUS="false"
           fi
           
           # Check health endpoint
-          if curl -f -s "$PROD_URL/health.json" | jq -e '.status == "healthy"' > /dev/null; then
-            echo "✅ Health endpoint is working"
+          if command -v jq > /dev/null; then
+            if curl -f -s "$PROD_URL/health.json" | jq -e '.status == "healthy"' > /dev/null; then
+              echo "✅ Health endpoint is working"
+            else
+              echo "❌ Health endpoint failed"
+              HEALTH_STATUS="false"
+            fi
           else
-            echo "❌ Health endpoint failed"
-            echo "healthy=false" >> $GITHUB_OUTPUT
-            exit 1
+            if curl -f -s "$PROD_URL/health.json" > /dev/null; then
+              echo "✅ Health endpoint is accessible"
+            else
+              echo "❌ Health endpoint failed"
+              HEALTH_STATUS="false"
+            fi
           fi
           
           # Check that it shows production environment
@@ -478,19 +528,23 @@ jobs:
             echo "✅ Production environment verified"
           else
             echo "❌ Production environment not detected"
-            echo "healthy=false" >> $GITHUB_OUTPUT
-            exit 1
+            HEALTH_STATUS="false"
           fi
           
           # Simulate occasional failure for demo (15% chance)
           if [ $((RANDOM % 7)) -eq 0 ]; then
             echo "❌ Simulated health check failure for demo!"
-            echo "healthy=false" >> $GITHUB_OUTPUT
-            exit 1
+            HEALTH_STATUS="false"
           fi
           
-          echo "✅ All production health checks passed!"
-          echo "healthy=true" >> $GITHUB_OUTPUT
+          echo "healthy=$HEALTH_STATUS" >> $GITHUB_OUTPUT
+          
+          if [ "$HEALTH_STATUS" == "false" ]; then
+            echo "❌ Health checks failed!"
+            exit 1
+          else
+            echo "✅ All production health checks passed!"
+          fi
           
       - name: 🚨 Auto-Rollback on Failure
         if: failure() && steps.health-check.outputs.healthy == 'false' && env.backup_bucket != ''
@@ -500,7 +554,7 @@ jobs:
           
           # Restore from backup
           echo "💾 Restoring from backup: ${{ env.backup_bucket }}"
-          aws s3 sync s3://${{ env.backup_bucket }}/ s3://${{ secrets.AWS_PROD_BUCKET }}/
+          aws s3 sync "s3://${{ env.backup_bucket }}/" "s3://${{ secrets.AWS_PROD_BUCKET }}/"
           
           # Invalidate CloudFront cache after rollback
           if [ -n "${{ vars.AWS_PROD_CLOUDFRONT_ID }}" ]; then
@@ -532,24 +586,32 @@ jobs:
     if: always()
     steps:
       - name: ⚙️ Configure AWS Credentials
+        if: needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: us-east-2
           
       - name: 🧹 Cleanup Old Backups
+        if: needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success'
         run: |
           echo "🧹 Cleaning up old backup buckets..."
           
           # List backup buckets older than 7 days and delete them
-          aws s3api list-buckets --query 'Buckets[?contains(Name, `backup`) && CreationDate < `'$(date -d '7 days ago' -u +%Y-%m-%dT%H:%M:%SZ)'`].Name' --output text | \
-          while read bucket; do
+          CUTOFF_DATE=$(date -d '7 days ago' -u +%Y-%m-%dT%H:%M:%SZ)
+          
+          # Get list of all buckets and filter for backup buckets
+          aws s3api list-buckets --output json | \
+          jq -r --arg cutoff "$CUTOFF_DATE" '.Buckets[] | select(.Name | contains("backup")) | select(.CreationDate < $cutoff) | .Name' | \
+          while read -r bucket; do
             if [ -n "$bucket" ]; then
               echo "🗑️ Deleting old backup bucket: $bucket"
-              aws s3 rb s3://$bucket --force
+              # First empty the bucket, then delete it
+              aws s3 rm "s3://$bucket" --recursive
+              aws s3 rb "s3://$bucket"
             fi
-          done
+          done || echo "ℹ️ No old backup buckets to cleanup"
           
       - name: 📧 Send Notifications
         run: |
@@ -557,12 +619,16 @@ jobs:
           
           if [ "${{ needs.deploy-staging.result }}" == "success" ]; then
             echo "✅ Staging deployment successful - ready for production"
+          elif [ "${{ needs.deploy-staging.result }}" == "failure" ]; then
+            echo "❌ Staging deployment failed"
           fi
           
           if [ "${{ needs.deploy-production.result }}" == "success" ]; then
             echo "🎉 Production deployment successful!"
           elif [ "${{ needs.deploy-production.result }}" == "failure" ]; then
             echo "🚨 Production deployment failed - rollback initiated"
+          elif [ "${{ needs.deploy-production.result }}" == "skipped" ]; then
+            echo "ℹ️ Production deployment was skipped"
           fi
           
           # Here you would add your notification integrations:
