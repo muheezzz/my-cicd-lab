@@ -48,7 +48,8 @@ jobs:
           mkdir -p dist
           
           # Main HTML file
-          cat > dist/index.html << 'EOF'
+          cat > dist/index.html << 
+          EOF
           <!DOCTYPE html>
           <html lang="en">
           <head>
