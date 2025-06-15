@@ -306,7 +306,7 @@ jobs:
             --include "api.json"
           
           # Get the staging URL (Fixed region consistency)
-          STAGING_URL="http://${{ secrets.AWS_STAGING_BUCKET }}.s3-website-us-east-2.amazonaws.com"
+          STAGING_URL="http://${{ secrets.AWS_STAGING_BUCKET }}.s3-website.us-east-2.amazonaws.com"
           echo "staging_url=$STAGING_URL" >> $GITHUB_OUTPUT
           
           echo "✅ S3 staging deployment complete!"
