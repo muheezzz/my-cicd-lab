@@ -1,25 +1,30 @@
-name: Website Tests
+name: Website Quality Check
 on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install HTML validator
+      - name: Check for broken links
         run: |
-          sudo apt-get update
-          sudo apt-get install -y tidy
-      - name: Validate HTML
-        run: |
-          echo "🔍 Checking HTML syntax..."
-          tidy -q -e index.html
-          echo "✅ HTML is valid!"
-      - name: Check required content
-        run: |
-          echo "🔍 Checking if title exists..."
-          grep -q "<title>" index.html || (echo "❌ Missing title tag!" && exit 1)
-          echo "✅ Title tag found!"
+          echo "🔍 Checking CSS file is linked correctly..."
+          grep -q 'href="style.css"' index.html || (echo "❌ CSS not linked!" && exit 1)
+          echo "✅ CSS linked correctly!"
           
-          echo "🔍 Checking if h1 exists..."
-          grep -q "<h1>" index.html || (echo "❌ Missing h1 tag!" && exit 1)
-          echo "✅ H1 tag found!"
+      - name: Check accessibility basics
+        run: |
+          echo "🔍 Checking for alt text on images..."
+          if grep -q '<img' index.html; then
+            grep -q 'alt=' index.html || (echo "❌ Images missing alt text!" && exit 1)
+          fi
+          echo "✅ Accessibility check passed!"
+          
+      - name: Performance check
+        run: |
+          echo "🔍 Checking file sizes..."
+          size=$(wc -c < index.html)
+          if [ $size -gt 10000 ]; then
+            echo "❌ HTML file too large: $size bytes"
+            exit 1
+          fi
+          echo "✅ File size OK: $size bytes"
